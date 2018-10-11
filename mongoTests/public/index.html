@@ -12,20 +12,20 @@
 	<body>
 		<h1>Sample Form UI</h1>
 		<p>Relax, this was a test</p>
-		<form action="/registerHalloween" method="POST">
+		<div id="newItemForm" action="/registerHalloween" method="POST">
 			<label for="inputName">Name: </label>
-			<input type="text" name="inputName"></input><br>
+			<input id="inputName" type="text" name="inputName"></input><br>
 			<label for="inputAge">Age: </label>
-			<input type="number" name="inputAge"></input><br>
+			<input id="inputAge" type="number" name="inputAge"></input><br>
 			<label for="inputRole">Costume: </label>
-			<select name="inputRole">
+			<select id="inputRole" name="inputRole">
 				<option value="ghost">Ghost</option>
 				<option value="ninja">Ninja</option>
 				<option value="pirate">Pirate</option>
 				<option value="scream">Scream</option>
 			</select><br>
-			<input type="submit"></input>
-		</form>
+			<button id="newItemBtn" >Add Item</button>
+		</div>
 		<div id="recordsSection">
 		</div>
 	</body>

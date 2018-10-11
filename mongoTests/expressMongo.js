@@ -20,18 +20,6 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 app.use(express.static(__dirname + '/public'));
 
 
-MongoClient.connect(url, { useNewUrlParser: true }, function(err, db) {
-	  if (err) throw err;
-	  var dbo = db.db("halloween");
-	  //console.log(req.params.id);
-	  var myquery = { name : 'Joe Schmoe' };
-	  dbo.collection("halloween_users").deleteOne(myquery, function(err, obj) {
-	    if (err) throw err;
-	    console.log(myquery);
-	    console.log("1 document deleted");
-	    db.close();
-		})
-});
 app.get('/', (req, res) => {
 	res.status(200).sendFile(path.join( __dirname + '/public'));
 });
@@ -40,17 +28,22 @@ app.get('/', (req, res) => {
 app.post('/registerHalloween', (req, res) => {
 	let registrant = req.body;
 	//log registrant to console
-	console.log(registrant);
+	//console.log(registrant);
 	//return registrant form JSON submission to client
-	res.status(200).json(registrant);
 	MongoClient.connect(url,  { useNewUrlParser: true }, (err, db) => {
 		if (err) throw err;
 		let dbo = db.db("halloween");
 		dbo.collection("halloween_users").insertOne(registrant, (err, res) => {
 			if (err) throw err;
 			console.log("1 Document inserted");
-			db.close();
+			 
 		})
+		var query = {};
+	     dbo.collection("halloween_users").find(query).toArray(function(err, result) {
+	   		 if (err) throw err;
+	    	 res.status(300).send(JSON.stringify(result));	
+		})
+	    db.close();
 	})
 })
 
@@ -62,37 +55,30 @@ app.get('/records', (req, res) => {
 	  dbo.collection("halloween_users").find(query).toArray(function(err, result) {
 	    if (err) throw err;
 	    res.send(JSON.stringify(result));
+	   })
 	    db.close();
 	  });
-	});
 })
 
 app.delete('/records/:id', (req, res) => {
 	MongoClient.connect(url, { useNewUrlParser: true }, function(err, db) {
 	  if (err) throw err;
 	  var dbo = db.db("halloween");
-	  console.log(req.params.id);
+	  //console.log(req.params.id);
 	  var myquery = { "_id" : ObjectId(req.params.id)};
 	  dbo.collection("halloween_users").deleteOne(myquery, function(err, obj) {
 	    if (err) throw err;
-	    console.log(myquery);
 	    console.log("1 document deleted");
-	    db.close();
 		})
-	})
-
-	MongoClient.connect(url, { useNewUrlParser: true }, function(err, db) {
-      if (err) throw err;
-	  var dbo = db.db("halloween");
-	  console.log(req.params.id);
-	  var myquery = {  _id : req.params.id };
-      dbo.collection("halloween_users").find({}).toArray(function(err, result) {
-	    if (err) throw err;
-	    res.send(JSON.stringify(result));
+	    var query = {};
+	     dbo.collection("halloween_users").find(query).toArray(function(err, result) {
+	   		 if (err) throw err;
+	    	 res.send(JSON.stringify(result));	
+		})
 	    db.close();
-	  });
-	});
+	})
 });
+
 app.listen(portNumber, () => {
 	console.log(`Server listening on port ${portNumber}`);
 });

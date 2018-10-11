@@ -4,15 +4,21 @@ $(() => {
 	const recordsSection = $('div#recordsSection');
 	requestRecords();
 
-	console.log(recordsSection);
 	$('div#recordsSection').on("click", "button.deleteBtn", (event) => {
-		console.log(this);
-		console.log(event.target);
-		console.log($(event.target).parent()[0].id);
+
 		deleteRecord($(event.target).parent()[0].id);
-	console.log('Hi');
-	//console.log($(this).parent.data('id'));
-})
+	})
+
+	$('button#newItemBtn').on('click', (event) => {
+		//get values from input fields
+		let newItem = {};
+		newItem.inputName = $('input#inputName').val();
+		newItem.inputAge = $('input#inputAge').val();
+		newItem.inputRole = $('select#inputRole').val();
+		//stringify newItem for http
+		addRecord(newItem);
+		//send post fetch request
+	})
 })
 
 const requestRecords = () => {//loads records from server
@@ -22,7 +28,6 @@ const requestRecords = () => {//loads records from server
 			return response.json();
 		})
 		.then((myJson) => {
-			console.log(myJson);
 			displayRecords(myJson)
 		})
 		return objs;	
@@ -46,8 +51,26 @@ const displayRecords = (records) => {//receives records in JSON form
 const deleteRecord = (id) => {
 	return fetch(server + "/records/" +  id, 
 			{method: 'delete'}).then(response => {
-				response.json().then(json => {
-					return displayRecords(json);
-				})
-		})
+				response.json()
+			})
+     		.then(objs => {
+     			return displayRecords(objs);
+    		 }); // parses response to JSON
+}
+
+const addRecord = (newItem) => {
+	 return fetch(server + "/registerHalloween/", {
+        method: "POST", // *GET, POST, PUT, DELETE, etc.
+        headers: {
+            "Content-Type": "application/json; charset=utf-8",
+            // "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: JSON.stringify(newItem), // body data type must match "Content-Type" header
+    })
+    .then(response => {
+        return response.json()
+     })
+     .then(objs => {
+     	return displayRecords(objs);
+     }); // parses response to JSON
 }
