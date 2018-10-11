@@ -6,8 +6,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const MongoClient = require('mongodb').MongoClient;
+let ObjectId = require('mongodb').ObjectID;
 const dbUsername = process.argv[2];
-const dbPassword = process.argv[3]
+const dbPassword = process.argv[3];
 const url = `mongodb://${dbUsername}:${dbPassword}1@ds125273.mlab.com:25273/halloween`;
 let app = express();
 const portNumber = 3000;
@@ -18,9 +19,23 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 app.use(express.static(__dirname + '/public'));
 
+
+MongoClient.connect(url, { useNewUrlParser: true }, function(err, db) {
+	  if (err) throw err;
+	  var dbo = db.db("halloween");
+	  //console.log(req.params.id);
+	  var myquery = { name : 'Joe Schmoe' };
+	  dbo.collection("halloween_users").deleteOne(myquery, function(err, obj) {
+	    if (err) throw err;
+	    console.log(myquery);
+	    console.log("1 document deleted");
+	    db.close();
+		})
+});
 app.get('/', (req, res) => {
 	res.status(200).sendFile(path.join( __dirname + '/public'));
 });
+
 
 app.post('/registerHalloween', (req, res) => {
 	let registrant = req.body;
@@ -51,6 +66,33 @@ app.get('/records', (req, res) => {
 	  });
 	});
 })
+
+app.delete('/records/:id', (req, res) => {
+	MongoClient.connect(url, { useNewUrlParser: true }, function(err, db) {
+	  if (err) throw err;
+	  var dbo = db.db("halloween");
+	  console.log(req.params.id);
+	  var myquery = { "_id" : ObjectId(req.params.id)};
+	  dbo.collection("halloween_users").deleteOne(myquery, function(err, obj) {
+	    if (err) throw err;
+	    console.log(myquery);
+	    console.log("1 document deleted");
+	    db.close();
+		})
+	})
+
+	MongoClient.connect(url, { useNewUrlParser: true }, function(err, db) {
+      if (err) throw err;
+	  var dbo = db.db("halloween");
+	  console.log(req.params.id);
+	  var myquery = {  _id : req.params.id };
+      dbo.collection("halloween_users").find({}).toArray(function(err, result) {
+	    if (err) throw err;
+	    res.send(JSON.stringify(result));
+	    db.close();
+	  });
+	});
+});
 app.listen(portNumber, () => {
 	console.log(`Server listening on port ${portNumber}`);
 });
