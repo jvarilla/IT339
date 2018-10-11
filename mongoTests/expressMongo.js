@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
 	res.status(200).sendFile(path.join( __dirname + '/public'));
 });
 
-app.post('/recordscore', (req, res) => {
+app.post('/registerHalloween', (req, res) => {
 	let registrant = req.body;
 	//log registrant to console
 	console.log(registrant);
@@ -37,6 +37,19 @@ app.post('/recordscore', (req, res) => {
 			db.close();
 		})
 	})
+})
+
+app.get('/records', (req, res) => {
+	MongoClient.connect(url, { useNewUrlParser: true }, function(err, db) {
+	  if (err) throw err;
+	  var dbo = db.db("halloween");
+	  var query = {};
+	  dbo.collection("halloween_users").find(query).toArray(function(err, result) {
+	    if (err) throw err;
+	    res.send(JSON.stringify(result));
+	    db.close();
+	  });
+	});
 })
 app.listen(portNumber, () => {
 	console.log(`Server listening on port ${portNumber}`);
